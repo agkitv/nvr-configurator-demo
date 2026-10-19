@@ -566,6 +566,9 @@ main{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 .hd{padding:16px 22px 0;border-bottom:1px solid var(--ln);background:#0b1018}
 main>.hd{border-bottom:0;padding:10px 22px 0}
 main>.hd .cr{font-size:11px;margin-bottom:0;line-height:1.35}
+main>.hd .hd-title-row h1{display:flex;align-items:center;min-width:0;overflow:hidden}
+main>.hd .hd-title-row .hd-title-inner{flex:1;min-width:0}
+main>.hd .hd-title-row .hdacts{flex:0 0 auto;position:relative;z-index:2}
 main>.hd h1{font-size:18px;font-weight:600;margin:2px 0 4px;gap:8px}
 main>.hd .hd-ic{font-size:17px}
 main>.hd .hd-ic .ic-svg,main>.hd .hd-ic .ici .ic-svg{width:18px;height:18px}
@@ -5579,9 +5582,9 @@ function syncSearchFieldsFromTreeSearchField(){
   if(treeSearchField)searchFields.add(treeSearchField);
 }
 function treeSearchFieldPlaceholder(){
-  if(!treeSearchField)return i18n("Фильтр по имени, IP, ID...");
+  if(!treeSearchField)return i18n("Фильтр по дереву");
   const key=SEARCH_FIELD_PLACEHOLDERS[treeSearchField];
-  return key?i18n(key):i18n("Фильтр по имени, IP, ID...");
+  return key?i18n(key):i18n("Фильтр по дереву");
 }
 function treeSearchFieldPrefixLabel(){
   if(!treeSearchField)return "";
@@ -8037,11 +8040,23 @@ function fullCardBtn(){
   const lb=mainFull?i18n("Вернуть панели"):i18n("Развернуть карточку на весь экран");
   return`<button type="button" class="btn s full-btn${mainFull?" on":""}" title="${escHtml(lb)} (Esc)" aria-label="${escHtml(lb)}" aria-pressed="${mainFull?"true":"false"}" onclick="toggleMainFull()">${mainFull?FULL_IC_OFF:FULL_IC_ON}</button>`;
 }
+function syncMainFullChrome(updateBtn){
+  document.getElementById("ws")?.classList.toggle("full",mainFull);
+  if(!updateBtn)return;
+  const btn=document.querySelector("main .hd .full-btn");
+  if(!btn)return;
+  const lb=mainFull?i18n("Вернуть панели"):i18n("Развернуть карточку на весь экран");
+  btn.classList.toggle("on",mainFull);
+  btn.title=lb+" (Esc)";
+  btn.setAttribute("aria-label",lb);
+  btn.setAttribute("aria-pressed",mainFull?"true":"false");
+  btn.innerHTML=mainFull?FULL_IC_OFF:FULL_IC_ON;
+}
 function setMainFull(v){
   v=!!v;if(mainFull===v)return;
   mainFull=v;
-  document.getElementById("ws")?.classList.toggle("full",mainFull);
-  paint();
+  syncMainFullChrome(true);
+  scheduleMainCrumbs();
 }
 function toggleMainFull(){setMainFull(!mainFull)}
 const ESC_LAYERS=[
@@ -8351,7 +8366,7 @@ function filtPopHtml(opts={}){
         <div class="sec">${i18n("Фильтр по тексту")}</div>
         <div class="filt-tree-q-wrap">
           <div class="sq">
-            <input id="treeQInp" placeholder="${i18n("Фильтр по имени, IP, ID...")}" title="${i18n("Фильтрация дерева по названию, короткому имени, ID, IP, производителю и модели")}" value="${treeQ.replace(/"/g,"&quot;")}" oninput="setTreeQ(this.value)" autocomplete="off">
+            <input id="treeQInp" placeholder="${i18n("Фильтр по дереву")}" title="${i18n("Фильтрация дерева по названию, короткому имени, ID, IP, производителю и модели")}" value="${treeQ.replace(/"/g,"&quot;")}" oninput="setTreeQ(this.value)" autocomplete="off">
             <button type="button" class="sq-clear ${treeQ.trim()?"":"hide"}" id="treeSqClear" title="${i18n("Очистить")}" onclick="clearTreeFilterQ(event)">✕</button>
           </div>
         </div>
@@ -11261,6 +11276,7 @@ function wnx(){
 function paint(){invalidateGoTargets();if(!document.querySelector("#rail .rail-tabs"))renderRail();else syncRail();syncGoInput();updateFiltChrome();syncHdrGoHint();
   if(_lastApp!==app){aside();_lastApp=app}else{renderTree();renderFavs()}
   refreshMainPanel();
+  syncMainFullChrome(false);
   ensureCrumbResizeObserver();
   scheduleMainCrumbs();
   if(app!=="gear")syncDomAct();
