@@ -1,0 +1,11 @@
+{
+  "name": "wizard-search-tz-capture",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "puppeteer": "24.22.0"
+  },
+  "allowScripts": {
+    "puppeteer@24.22.0": true
+  }
+}

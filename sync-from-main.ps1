@@ -13,7 +13,8 @@ $tzDst = "$here\tz"
 if (Test-Path $tzSrc) {
   if (Test-Path $tzDst) { Remove-Item $tzDst -Recurse -Force }
   Copy-Item $tzSrc $tzDst -Recurse -Force
-  Write-Host "Copied docs/tz -> tz/"
+  Get-ChildItem $tzDst -Recurse -Directory -Filter node_modules -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force
+  Write-Host "Copied docs/tz -> tz/ (node_modules excluded)"
 } else {
   Write-Warning "TZ not found: $tzSrc (skip)"
 }
